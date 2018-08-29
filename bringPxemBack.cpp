@@ -2,11 +2,8 @@
 #include<fstream>
 #include<stack>
 #include<string>
+#include<cstdlib>
 using namespace std;
-
-string extractor(string s);
-void run(string proc, bool d);
-void run(string proc);
 
 //This is a class designed for Pxem.
 class PxemStack{
@@ -36,6 +33,9 @@ class PxemStack{
 			stk.push(i);
 		}
 		int pop(){
+			if(empty()){
+				throw "Runtime Error! You tried to pop although stack is empty!";
+			}
 			int tmp = stk.top();
 			stk.pop();
 			return tmp;
@@ -46,76 +46,30 @@ class PxemStack{
 		size_t size(){
 			return stk.size();
 		}
-		/*
-		void dott(){
-			//This is for .t operation.
-			temporal=pop();
-			temb=true;
-		}
-		void dotm(){
-			//This is for .m operation.
-			if(!temb)	return;
-			push(temporal);
-			temb=false;
-		}
-		*/
 		
-		/*
-		void dotp(){
-			while(!stack.empty()){
-				cout << char(stack.top());
-				stack.pop();
+		void push(string s){
+			for(size_t i=s.size(); i>=0; i--){
+				push((int)s[i]);
 			}
 		}
-		void doto(){
-			cout << char(stack.top());
-			stack.pop();
-		}
-		void dotn(){
-			cout << int(stack.top());
-			stack.pop();
-		}
-		void doti(){
-			char tmp;
-			cin >> tmp;
-			//TBH what does that mean "If you reach to EOF, it returns -1"?
-			if(cin::eof()){
-				tmp = -1;
+		void push(PxemStack stack){
+			string s="";
+			while(stack.empty()){
+				s=s+char(stack.pop());
 			}
-			stack.push(tmp);
+			push(s);
 		}
-		void dot_(){
-			int tmp;
-			cin >> tmp;
-			stack.push(tmp);
-		}
-		void dotc(){
-			if(stack.empty())	return;
-			int tmp=stack.top();
-			stack.push(tmp);
-		}
-		void dots(){
-			if(stack.empty())	return;
-			stack.pop();
-		}
-		void dotv(){
-			size_t n=stack.size();
-			int tmp[n];
-			for(size_t i=0; !stack.empty(); i++){
-				tmp[i]=stack.top();
-				stack.pop();
-			}
-			for(size_t i=0; i<n; i++){
-				stack.push(tmp[i]);
-			}
-		}
-		void dotf(string f;){
-			while(!f.empty()){
-				stack.push(f.
-			}
-		}
-		*/
 };
+
+string extractor(string s);
+void run(string proc, string fcon, bool d);
+void run(string proc, string fcon);
+PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d);
+PxemStack miniRun(string fcon, PxemStack stk, bool d);
+int GetRandom(int min,int max);
+bool isDot(char c);
+bool isLBraket(char c);
+bool isRBraket(char c);
 
 int main(int argc, char* argv[]){
 	try{
@@ -164,6 +118,8 @@ int main(int argc, char* argv[]){
 	*/
 	
 	string proc=extractor(fname);
+	string fcon;
+	fin >> fcon;
 	
 	//cout << proc << endl;
 	
@@ -171,13 +127,13 @@ int main(int argc, char* argv[]){
 		if(argc==3){
 			//cout << argv[2] << endl;
 			if(argv[2]=="-d"){
-				run(proc, true);
+				run(proc, fcon, true);
 			}
 			else{
-				run(proc);
+				run(proc, fcon);
 			}
 		}else{
-			run(proc);
+			run(proc, fcon);
 		}
 	}catch(const char* e){
 		cerr << e << endl;
@@ -200,22 +156,34 @@ string extractor(string s){
 	return s;
 }
 
-void run(string proc, bool d){
-	PxemStack tk;	//stack
+void run(string proc, string fcon, bool d){
+	PxemStack stk;
+	miniRun(proc, fcon, stk, d);
+}
+
+void run(string proc, string fcon){
+	run(proc, fcon, false);
+}
+
+PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
+	PxemStack tk=stk;	//stack
 	int reg;	//Temporal Region
 	bool reu=false;	//Whether reg is stored or not
 	
 	size_t ptr=0;	//Pointer
-	string str="";	//Temporal String until it ptr reaches to order
+	string str=proc;	//Temporal String until it ptr reaches to order
 	
 	int i1, i2;
 	char c1;
+	
+	//stack<size_t> token;	//When you get .w, .x, .y, or .z but won't skip to next to .a, the ptr where it places will be stored. When you get .a later, you will go back to where this token indicates. If you get .a before .w, .x, .y, or .z, or opposite, it's an error.
+	//stack<size_t> nekot;	//Where .a locates.
 	
 	//bool sawDot=false;
 	while(ptr<proc.size()){
 	
 		//From Below:Debug Part
-		//if(d){
+		if(d){
 			cout << ptr << endl;
 			cout << str << endl;
 			
@@ -224,46 +192,49 @@ void run(string proc, bool d){
 				cout << ' ';
 			}
 			cout << '^' << endl;
-		//}
+		}
 		//From Above:Debug Part
 		
-		if(proc[ptr]=='.'){
-			for(size_t i=str.size(); i>0; i--){
-				tk.push(str[i-1]);
-			}
+		if(isDot(proc[ptr])){
+			tk.push(str);
 			str="";
 			switch(proc[++ptr]){
-				case 'p':
+				case 'p':{
 					//Outputs the entire contents of tk as string.
 					while(!tk.empty()){
 						cout << (char)tk.pop();
 					}
 					cout << endl;
 					break;
-				case 'o':
+				}
+				case 'o':{
 					//Outputs one popped valued as character.
 					if(!tk.empty()){
 						cout << (char)tk.pop();
 					}
 					break;
-				case 'n':
+				}
+				case 'n':{
 					//Outputs one popped value as a numeral value.
 					if(!tk.empty()){
 						cout << (int)tk.pop();
 					}
 					break;
-				case 'i':
+				}
+				case 'i':{
 					//Gets an input and push it as a character. If the data was EOF, -1 will be pushed.
 					cin >> c1;
 					tk.push((cin.eof())?-1:c1);
 					break;
-				case '_':
+				}
+				case '_':{
 					//Gets an input and push it as an integer.
 					
 					cin >> i1;
 					tk.push(i1);
 					break;
-				case 'c':
+				}
+				case 'c':{
 					//Copies popped value and pushes two of them.
 					if(!tk.empty()){
 						c1=tk.pop();
@@ -271,75 +242,172 @@ void run(string proc, bool d){
 						tk.push(c1);
 					}
 					break;
-				case 's':
+				}
+				case 's':{
 					//Just throws popped value away.
 					if(!tk.empty()){
 						tk.pop();
 					}
 					break;
-				case 'v':
+				}
+				case 'v':{
 					//Reverses the content of stack. You should not do this for too many times.
-					int tmpn1=tk.size();
-					char tmp4[tmpn1];
-					for(size_t i=0; i<tmpn1; i++){
-						tmp4[i]=tk.pop();
+					string tmp4="";
+					while(!tk.empty()){
+						tmp4=char(tk.pop())+tmp4;
 					}
-					for(size_t i=0; i<tmpn1; i++){
-						tk.push(tmp4[i]);
-					}
+					tk.push(tmp4);
 					break;
-				case 'f':
+				}
+				case 'f':{
 					//Pushes the content of file as string. You can use this command as many times as you'd like.
-					
+					for(size_t i=0; i<fcon.size(); i++){
+						tk.push(fcon[i]);
+					}
 					break;
-				case 'e':
+				}
+				case 'e':{
 					//Runs the content of file as Pxem code. This will be run at another process. The content of stack will be copied to new one. After it stops the content of new one will be stacked to old one.
+					PxemStack tmpTk = miniRun(fcon, tk, d);
+					tk.push(tmpTk);
 					break;
-				case 'r':
+				}
+				case 'r':{
 					//Pops, then generate one random number that is 0 or bigger and smaller than popped value. Generated number will be pushed.
+					i1 = tk.pop();
+					tk.push(GetRandom(0, i1-1));
 					break;
-				case 'w':
+				}
+				case 'w':{
 					//Pops the stack. If it is 0, skips to next to ".a".
 					if(!tk.empty()){
-						
+						if(tk.pop()==0){
+							size_t brak=1;	//Bracket Counter
+							while(brak>0){
+								if(ptr==proc.size()-1){
+									throw "Runtime Error! There was no .a corresponding to .w!";
+								}
+								if(isDot(proc[++ptr])){
+									if(isRBraket(proc[++ptr])){
+										brak--;
+									}else if(isLBraket(proc[++ptr])){
+										brak++;
+									}
+								}
+							}
+						}
 					}
 					break;
-				case 'x':
+				}
+				case 'x':{
 					//Pops twice. If former-popped value ISN't smaller than latter one, skips to next to ".a".
 					if(tk.size()>=2){
-						
+						i1=tk.pop();
+						i2=tk.pop();
+						if(!(i1<i2)){
+							size_t brak=1;	//Bracket Counter
+							while(brak>0){
+								if(ptr==proc.size()-1){
+									throw "Runtime Error! There was no .a corresponding to .x!";
+								}
+								if(isDot(proc[++ptr])){
+									if(isRBraket(proc[++ptr])){
+										brak--;
+									}else if(isLBraket(proc[++ptr])){
+										brak++;
+									}
+								}
+							}
+						}
 					}
 					break;
-				case 'y':
+				}
+				case 'y':{
 					//Pops twice. If former-popped value ISN'T bigger than latter one, skips to next to ".a".
 					if(tk.size()>=2){
-						
+						i1=tk.pop();
+						i2=tk.pop();
+						if(!(i1>i2)){
+							size_t brak=1;	//Bracket Counter
+							while(brak>0){
+								if(ptr==proc.size()-1){
+									throw "Runtime Error! There was no .a corresponding to .y!";
+								}
+								if(isDot(proc[++ptr])){
+									if(isRBraket(proc[++ptr])){
+										brak--;
+									}else if(isLBraket(proc[++ptr])){
+										brak++;
+									}
+								}
+							}
+						}
 					}
 					break;
-				case 'z':
+				}
+				case 'z':{
 					//Pops twice. If they are equal, skips to next to ".a".
 					if(tk.size()>=2){
-						
+						i1=tk.pop();
+						i2=tk.pop();
+						if(i1==i2){
+							size_t brak=1;	//Bracket Counter
+							while(brak>0){
+								if(ptr==proc.size()-1){
+									throw "Runtime Error! There was no .a corresponding to .z!";
+								}
+								if(isDot(proc[++ptr])){
+									if(isRBraket(proc[++ptr])){
+										brak--;
+									}else if(isLBraket(proc[++ptr])){
+										brak++;
+									}
+								}
+							}
+						}
 					}
 					break;
-				case 'a':
+				}
+				case 'a':{
 					//Goes back to either .w, .x, .y, or .z. If no commands, that's an error.
+					size_t brak=1;	//Bracket Counter
+					while(brak>0){
+						if(ptr==0){
+							throw "Runtime Error! There was no .w, .x, .y, nor .z corresponding to .a!";
+						}
+						if(isLBraket(proc[--ptr])){
+							if(isDot(proc[--ptr])){
+								brak--;
+							}
+						}else if(isRBraket(proc[--ptr])){
+							if(isDot(proc[--ptr])){
+								brak++;
+							}
+						}
+					}
+					ptr--;
 					break;
-				case 't':
+				}
+				case 't':{
 					//Stores popped-value to reu, the temporal region.
 					reg=tk.pop();
+					reu=true;
 					break;
-				case 'm':
+				}
+				case 'm':{
 					//Pushes the value on the temporal region. If empty, don't.
 					if(reu){
 						tk.push(reg);
+						reu=false;
 					}
 					break;
-				case 'd':
+				}
+				case 'd':{
 					//Ends the program.
-					return;
+					return tk;
 					break;
-				case '+':
+				}
+				case '+':{
 					//Pops twice, then pushes its sum.
 					if(tk.size()>=2){
 						i1=tk.pop();
@@ -347,7 +415,8 @@ void run(string proc, bool d){
 						tk.push(i1+i2);
 					}
 					break;
-				case '-':
+				}
+				case '-':{
 					//Pops twice, then pushes its difference(but in positive integer).
 					if(tk.size()>=2){
 						i1=tk.pop();
@@ -355,7 +424,8 @@ void run(string proc, bool d){
 						tk.push((i1>i2)?(i1-i2):(i2-i1));
 					}
 					break;
-				case '!':
+				}
+				case '!':{
 					//Pops twice, then pushes its product.
 					if(tk.size()>=2){
 						i1=tk.pop();
@@ -363,35 +433,65 @@ void run(string proc, bool d){
 						tk.push(i1*i2);
 					}
 					break;
-				case '$':
-					//Pops twice, then pushes its .
+				}
+				case '$':{
+					//Pops twice, then pushes its quotient.
 					if(tk.size()>=2){
 						i1=tk.pop();
 						i2=tk.pop();
 						tk.push((i1>i2)?(i1/i2):(i2/i1));
 					}
 					break;
-				case '%':
-					//Pops twice, then pushes its mod.
+				}
+				case '%':{
+					//Pops twice, then pushes its modulo.
 					if(tk.size()>=2){
 						i1=tk.pop();
 						i2=tk.pop();
 						tk.push((i1>i2)?(i1%i2):(i2%i1));
 					}
 					break;
-				default:
+				}
+				default:{
 					//It was NOT a command: push those characters.
 					tk.push('.');
 					tk.push(proc[ptr]);
 					break;
+				}
 			}
 		}else{
 			str=str+proc[ptr];
 		}
 		++ptr;
 	}
+	
+	return stk;
 }
 
-void run(string proc){
-	run(proc, false);
+PxemStack miniRun(string fcon, PxemStack stk, bool d){
+	return miniRun(fcon, fcon, stk, d);
+}
+
+
+int GetRandom(int min,int max){
+	static int flag;
+	
+	if (flag == 0) {
+		srand((unsigned int)time(NULL));
+		flag = 1;
+	}
+	
+	return min + (int)(rand()*(max-min+1.0)/(1.0+RAND_MAX));
+}
+
+bool isDot(char c){
+	return c=='.';
+}
+
+bool isLBraket(char c){
+	return c=='w'||c=='x'||c=='y'||c=='z';
+}
+
+bool isRBraket(char c){
+	return c=='a';
 }
