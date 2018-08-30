@@ -48,7 +48,10 @@ class PxemStack{
 		}
 		
 		void push(string s){
-			for(size_t i=s.size(); i>=0; i--){
+			//cout << s.size() << endl;
+			//cout << s[0] << endl;
+			for(int i=s.size()-1; i>=0; i--){
+				//cout << s[i] << endl;
 				push((int)s[i]);
 			}
 		}
@@ -58,6 +61,15 @@ class PxemStack{
 				s=s+char(stack.pop());
 			}
 			push(s);
+		}
+		
+		void print(){
+			stack<int> tmp = stk;
+			while(!tmp.empty()){
+				cout << (int)tmp.top() << ' ';
+				tmp.pop();
+			}
+			cout << endl;
 		}
 };
 
@@ -77,11 +89,16 @@ int main(int argc, char* argv[]){
 			throw "WRONG USAGE! You must use in this format!: ";
 		}
 	}catch(const char* e){
-		cerr << e <<  argv[0] << " [FileName]" << endl;
+		cerr << e <<  argv[0] << " [OPTIONS] FileName" << endl;
+		cerr << "Options:\n\t-d\tRun in debug mode" << endl;
 		return -1;
 	}
 	
-	static ifstream fin(argv[1]);
+	string fname = (argc==2)?(argv[1]):(argv[2]);
+	string opt = (argc==3)?(argv[1]):"";
+	
+	static ifstream fin(fname);
+	
 
 	try{
 		if(!fin.is_open()){
@@ -91,8 +108,6 @@ int main(int argc, char* argv[]){
 		cerr << e << endl;
 		return -2;
 	}
-	
-		string fname = argv[1];
 	
 	try{
 		if(fname.rfind(".pxe")==string::npos&&fname.rfind(".pxem")==string::npos){
@@ -124,14 +139,8 @@ int main(int argc, char* argv[]){
 	//cout << proc << endl;
 	
 	try{
-		if(argc==3){
-			//cout << argv[2] << endl;
-			if(argv[2]=="-d"){
-				run(proc, fcon, true);
-			}
-			else{
-				run(proc, fcon);
-			}
+		if(opt=="-d"){
+			run(proc, fcon, true);
 		}else{
 			run(proc, fcon);
 		}
@@ -171,7 +180,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 	bool reu=false;	//Whether reg is stored or not
 	
 	size_t ptr=0;	//Pointer
-	string str=proc;	//Temporal String until it ptr reaches to order
+	string str="";	//Temporal String until it ptr reaches to order
 	
 	int i1, i2;
 	char c1;
@@ -184,20 +193,34 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 	
 		//From Below:Debug Part
 		if(d){
-			cout << ptr << endl;
-			cout << str << endl;
-			
+			cout << "Current pointer: " << ptr << endl;
+			cout << "String I found so far: " << str << endl;
+			cout << "Current Processing Below\n";
 			cout << proc << endl;
 			for(size_t i=0; i<ptr; i++){
 				cout << ' ';
 			}
 			cout << '^' << endl;
+			if(reu==true){
+				cout << "Temporal Region: " << reg << endl;
+			}else{
+				cout << "Temporal Region is Empty" << endl;
+			}
+			
 		}
 		//From Above:Debug Part
 		
 		if(isDot(proc[ptr])){
 			tk.push(str);
 			str="";
+			
+			//From Below:Debug Part
+			if(d){
+				cout << "Current stack: ";
+				tk.print();
+			}
+			//From Above: Debug Part
+			
 			switch(proc[++ptr]){
 				case 'p':{
 					//Outputs the entire contents of tk as string.
@@ -223,12 +246,25 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'i':{
 					//Gets an input and push it as a character. If the data was EOF, -1 will be pushed.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "Input a character: ";
+					}
+					//Above Here:Debug
+					
 					cin >> c1;
 					tk.push((cin.eof())?-1:c1);
 					break;
 				}
 				case '_':{
 					//Gets an input and push it as an integer.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "Input an integer: ";
+					}
+					//Above Here:Debug
 					
 					cin >> i1;
 					tk.push(i1);
@@ -261,7 +297,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'f':{
 					//Pushes the content of file as string. You can use this command as many times as you'd like.
-					for(size_t i=0; i<fcon.size(); i++){
+					for(int i=0; i<fcon.size(); i++){
 						tk.push(fcon[i]);
 					}
 					break;
@@ -282,7 +318,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 					//Pops the stack. If it is 0, skips to next to ".a".
 					if(!tk.empty()){
 						if(tk.pop()==0){
-							size_t brak=1;	//Bracket Counter
+							int brak=1;	//Bracket Counter
 							while(brak>0){
 								if(ptr==proc.size()-1){
 									throw "Runtime Error! There was no .a corresponding to .w!";
@@ -305,7 +341,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1<i2)){
-							size_t brak=1;	//Bracket Counter
+							int brak=1;	//Bracket Counter
 							while(brak>0){
 								if(ptr==proc.size()-1){
 									throw "Runtime Error! There was no .a corresponding to .x!";
@@ -328,7 +364,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1>i2)){
-							size_t brak=1;	//Bracket Counter
+							int brak=1;	//Bracket Counter
 							while(brak>0){
 								if(ptr==proc.size()-1){
 									throw "Runtime Error! There was no .a corresponding to .y!";
@@ -351,7 +387,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(i1==i2){
-							size_t brak=1;	//Bracket Counter
+							int brak=1;	//Bracket Counter
 							while(brak>0){
 								if(ptr==proc.size()-1){
 									throw "Runtime Error! There was no .a corresponding to .z!";
@@ -370,16 +406,27 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'a':{
 					//Goes back to either .w, .x, .y, or .z. If no commands, that's an error.
-					size_t brak=1;	//Bracket Counter
+					int brak=1;	//Bracket Counter
 					while(brak>0){
+						
+						/*
+						//Below Here:Debug
+						if(d){
+							cout << "Current Pointer: " << ptr << endl;
+							cout << "Current Brackets: " << brak << endl;
+						}
+						//Above Here:Debug
+						*/
+						
 						if(ptr==0){
 							throw "Runtime Error! There was no .w, .x, .y, nor .z corresponding to .a!";
 						}
-						if(isLBraket(proc[--ptr])){
+						--ptr;
+						if(isLBraket(proc[ptr])){
 							if(isDot(proc[--ptr])){
 								brak--;
 							}
-						}else if(isRBraket(proc[--ptr])){
+						}else if(isRBraket(proc[ptr])){
 							if(isDot(proc[--ptr])){
 								brak++;
 							}
@@ -462,6 +509,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 		}else{
 			str=str+proc[ptr];
 		}
+		
+		//Below Here:Debug
+		if(d){
+			cout << endl;
+		}
+		//Above Here:Debug
+		
 		++ptr;
 	}
 	
@@ -489,7 +543,7 @@ bool isDot(char c){
 }
 
 bool isLBraket(char c){
-	return c=='w'||c=='x'||c=='y'||c=='z';
+	return (c=='w')||(c=='x')||(c=='y')||(c=='z');
 }
 
 bool isRBraket(char c){
