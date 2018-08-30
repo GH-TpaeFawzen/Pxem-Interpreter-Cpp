@@ -409,27 +409,32 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 					int brak=1;	//Bracket Counter
 					while(brak>0){
 						
-						/*
 						//Below Here:Debug
 						if(d){
 							cout << "Current Pointer: " << ptr << endl;
 							cout << "Current Brackets: " << brak << endl;
+							cout << endl;
+							cout << proc << endl;
+							for(int i=0; i<ptr; i++){
+								cout << ' ';
+							}
+							cout << '^' << endl;
 						}
 						//Above Here:Debug
-						*/
 						
 						if(ptr==0){
 							throw "Runtime Error! There was no .w, .x, .y, nor .z corresponding to .a!";
 						}
-						--ptr;
-						if(isLBraket(proc[ptr])){
+						if(isLBraket(proc[ptr--])){
 							if(isDot(proc[--ptr])){
 								brak--;
 							}
-						}else if(isRBraket(proc[ptr])){
+						}else if(isRBraket(proc[ptr--])){
 							if(isDot(proc[--ptr])){
 								brak++;
 							}
+						}else{
+							ptr--;
 						}
 					}
 					ptr--;
