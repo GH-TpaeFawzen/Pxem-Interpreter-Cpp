@@ -57,7 +57,7 @@ class PxemStack{
 		}
 		void push(PxemStack stack){
 			string s="";
-			while(stack.empty()){
+			while(!stack.empty()){
 				s=s+char(stack.pop());
 			}
 			push(s);
@@ -224,6 +224,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 			switch(proc[++ptr]){
 				case 'p':{
 					//Outputs the entire contents of tk as string.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "Here is output: ";
+					}
+					//Above Here:Debug
+					
 					while(!tk.empty()){
 						cout << (char)tk.pop();
 					}
@@ -232,6 +239,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'o':{
 					//Outputs one popped valued as character.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "Here is output: ";
+					}
+					//Above Here:Debug
+					
 					if(!tk.empty()){
 						cout << (char)tk.pop();
 					}
@@ -239,6 +253,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'n':{
 					//Outputs one popped value as a numeral value.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "Here is output: ";
+					}
+					//Above Here:Debug
+					
 					if(!tk.empty()){
 						cout << (int)tk.pop();
 					}
@@ -304,7 +325,22 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 				}
 				case 'e':{
 					//Runs the content of file as Pxem code. This will be run at another process. The content of stack will be copied to new one. After it stops the content of new one will be stacked to old one.
+					
+					//Below Here:Debug
+					if(d){
+						cout << "I got .e command. Below here is new execution.\n";
+					}
+					//Above Here:Debug
+					
 					PxemStack tmpTk = miniRun(fcon, tk, d);
+					
+					//Below Here:Debug
+					if(d){
+						cout << "New execution has just terminated. Here is the contents of last stack: ";
+						tmpTk.print();
+					}
+					//Above Here:Debug
+					
 					tk.push(tmpTk);
 					break;
 				}
@@ -528,6 +564,12 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 }
 
 PxemStack miniRun(string fcon, PxemStack stk, bool d){
+	//Below Here: Debug
+	if(d){
+		cout << "Here is the content of file: \n" << fcon << endl;
+	}
+	//Above Here: Debug
+	
 	return miniRun(fcon, fcon, stk, d);
 }
 
