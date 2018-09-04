@@ -82,6 +82,8 @@ int GetRandom(int min,int max);
 bool isDot(char c);
 bool isLBraket(char c);
 bool isRBraket(char c);
+int findLBraket(string s, int ptr, bool d);
+int findRBraket(string s, int ptr, bool d);
 
 int main(int argc, char* argv[]){
 	try{
@@ -354,19 +356,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 					//Pops the stack. If it is 0, skips to next to ".a".
 					if(!tk.empty()){
 						if(tk.pop()==0){
-							int brak=1;	//Bracket Counter
-							while(brak>0){
-								if(ptr==proc.size()-1){
-									throw "Runtime Error! There was no .a corresponding to .w!";
-								}
-								if(isDot(proc[++ptr])){
-									if(isRBraket(proc[++ptr])){
-										brak--;
-									}else if(isLBraket(proc[++ptr])){
-										brak++;
-									}
-								}
-							}
+							ptr=findRBraket(proc, ptr, d)-1;
 						}
 					}
 					break;
@@ -377,19 +367,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1<i2)){
-							int brak=1;	//Bracket Counter
-							while(brak>0){
-								if(ptr==proc.size()-1){
-									throw "Runtime Error! There was no .a corresponding to .x!";
-								}
-								if(isDot(proc[++ptr])){
-									if(isRBraket(proc[++ptr])){
-										brak--;
-									}else if(isLBraket(proc[++ptr])){
-										brak++;
-									}
-								}
-							}
+							proc=findRBraket(proc, ptr, d)-1;
 						}
 					}
 					break;
@@ -400,19 +378,7 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1>i2)){
-							int brak=1;	//Bracket Counter
-							while(brak>0){
-								if(ptr==proc.size()-1){
-									throw "Runtime Error! There was no .a corresponding to .y!";
-								}
-								if(isDot(proc[++ptr])){
-									if(isRBraket(proc[++ptr])){
-										brak--;
-									}else if(isLBraket(proc[++ptr])){
-										brak++;
-									}
-								}
-							}
+							ptr=findRBraket(proc, ptr, d)-1;
 						}
 					}
 					break;
@@ -423,57 +389,14 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(i1==i2){
-							int brak=1;	//Bracket Counter
-							while(brak>0){
-								if(ptr==proc.size()-1){
-									throw "Runtime Error! There was no .a corresponding to .z!";
-								}
-								if(isDot(proc[++ptr])){
-									if(isRBraket(proc[++ptr])){
-										brak--;
-									}else if(isLBraket(proc[++ptr])){
-										brak++;
-									}
-								}
-							}
+							ptr=findRBraket(proc, ptr, d)-1;
 						}
 					}
 					break;
 				}
 				case 'a':{
 					//Goes back to either .w, .x, .y, or .z. If no commands, that's an error.
-					int brak=1;	//Bracket Counter
-					while(brak>0){
-						
-						//Below Here:Debug
-						if(d){
-							cout << "Current Pointer: " << ptr << endl;
-							cout << "Current Brackets: " << brak << endl;
-							cout << endl;
-							cout << proc << endl;
-							for(int i=0; i<ptr; i++){
-								cout << ' ';
-							}
-							cout << '^' << endl;
-						}
-						//Above Here:Debug
-						
-						if(ptr==0){
-							throw "Runtime Error! There was no .w, .x, .y, nor .z corresponding to .a!";
-						}
-						if(isLBraket(proc[ptr--])){
-							if(isDot(proc[--ptr])){
-								brak--;
-							}
-						}else if(isRBraket(proc[ptr--])){
-							if(isDot(proc[--ptr])){
-								brak++;
-							}
-						}else{
-							ptr--;
-						}
-					}
-					ptr--;
+					ptr=findLBraket(proc, ptr, d)-1;
 					break;
 				}
 				case 't':{
@@ -595,4 +518,88 @@ bool isLBraket(char c){
 
 bool isRBraket(char c){
 	return c=='a';
+}
+
+int findLBraket(string s, int ptr, bool d){
+	ptr--;
+	int brak=1;	//Bracket Counter
+	while(ptr>0&&brak==0){
+		
+		//Below Here:Debug
+		if(d){
+			cout << "Current Pointer: " << ptr << endl;
+			cout << "Current Brackets: " << brak << endl;
+			cout << endl;
+			cout << s << endl;
+			for(int i=0; i<ptr; i++){
+				cout << ' ';
+			}
+			cout << '^' << endl;
+		}
+		//Above Here:Debug
+		
+		if(isDot(s[ptr-1])){
+			if(isLBraket(s[ptr])){
+				brak--;
+				ptr--;
+			}else if(isRBraket(s[ptr])){
+				brak++;
+				ptr--;
+			}else{
+				ptr-=2;
+			}
+		}else if(isLBraket(s[ptr-1])||isRBraket(s[ptr-1])){
+			ptr--;
+		}else{
+			ptr-=2;
+		}
+	}
+	
+	if(brak==0){
+		return ptr;
+	}
+	throw "Runtime Error! There was no .w, .x, .y, nor .z corresponding to .a!";
+}
+
+int findRBraket(string s, int ptr, bool d){
+	ptr++;
+	int brak=1;	//Bracket Counter
+	while(ptr<s.size()-1&&brak>0){
+		
+		//Below Here:Debug
+		if(d){
+			cout << "Current Pointer: " << ptr << endl;
+			cout << "Current Brackets: " << brak << endl;
+			cout << endl;
+			cout << s << endl;
+			for(int i=0; i<ptr; i++){
+				cout << ' ';
+			}
+			cout << '^' << endl;
+		}
+		//Above Here:Debug
+		
+		if(isRBraket(s[ptr+1])){
+			if(isDot(s[ptr])){
+				brak--;
+			}else{
+				ptr+=2;
+			}
+		}else if(isLBraket(s[ptr+1])){
+			if(isDot(s[ptr])){
+				brak++;
+			}else{
+				ptr+=2;
+			}
+		}else if(isDot(s[ptr+1])){
+			ptr++;
+		}else{
+			ptr+=2;
+		}
+	}
+	
+	if(brak==0){
+		return ptr;
+	}
+	throw "Runtime Error! There was no .a corresponding to .x, .y, or .z!";
 }
