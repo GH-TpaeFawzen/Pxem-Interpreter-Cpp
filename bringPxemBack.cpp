@@ -356,8 +356,10 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 					//Pops the stack. If it is 0, skips to next to ".a".
 					if(!tk.empty()){
 						if(tk.pop()==0){
-							ptr=findRBraket(proc, ptr, d)-1;
+							ptr=findRBraket(proc, ptr, d)+1;
 						}
+					}else{
+						ptr=findRBraket(proc, ptr, d)+1;
 					}
 					break;
 				}
@@ -367,8 +369,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1<i2)){
-							proc=findRBraket(proc, ptr, d)-1;
+							proc=findRBraket(proc, ptr, d)+1;
 						}
+					}else{
+						if(tk.size()==1){
+							tk.pop();
+						}
+						proc=findRBraket(proc, ptr, d)+1;
 					}
 					break;
 				}
@@ -378,8 +385,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(!(i1>i2)){
-							ptr=findRBraket(proc, ptr, d)-1;
+							ptr=findRBraket(proc, ptr, d)+1;
 						}
+					}else{
+						if(tk.size()==1){
+							tk.pop();
+						}
+						proc=findRBraket(proc, ptr, d)+1;
 					}
 					break;
 				}
@@ -389,8 +401,13 @@ PxemStack miniRun(string proc, string fcon, PxemStack stk, bool d){
 						i1=tk.pop();
 						i2=tk.pop();
 						if(i1==i2){
-							ptr=findRBraket(proc, ptr, d)-1;
+							ptr=findRBraket(proc, ptr, d)+1;
 						}
+					}else{
+						if(tk.size()==1){
+							tk.pop();
+						}
+						proc=findRBraket(proc, ptr, d)+1;
 					}
 					break;
 				}
