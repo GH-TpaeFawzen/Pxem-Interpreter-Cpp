@@ -26,4 +26,8 @@ Since official site didn't clarify some specific things about Pxem, I standardis
 * The sum of `.w`, `.x`, `.y`, and `.z` must be equal to that of `.a`.
   * Otherwise, run-time error will occur.
 * `.a` must not be put before first `.w`, `.x`, `.y`, or `.z`.
-* If the stack is empty when the interpreter reaches to `.w`, `.x`, `.y`, or `.z`, it'll 
+* If the stack is empty when the interpreter reaches to `.w`, `.x`, `.y`, or `.z`, it'll continue reading from next to the corresponding `.a`.
+  * If the stack has only a data when the interpreter reaches to `.x`, `.y`, or `.z`, the stack will be empty in addition to above.
+* If the stack has only a data when the interpreter reaches `.+`, `.-`, `.!`, `.$`, or `.%`, the content of stack won't be lost.
+* `.m` can be done as many times as you'd like, unless temporal-region is empty. In other word, the temporal-region will never be lost.
+* When the interpreter executes `.p`, `.o`, or `.n`, it'll output new-line character in addition to the content of the stack.
